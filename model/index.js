@@ -85,7 +85,7 @@ const updateContact = async (contactId, body) => {
     if (!contactToUpdate) throw new Error(`🚫 Cannot find contact id: ${contactId} to Update`)
 
     const indexOfContactToUpdate = contacts.indexOf(contactToUpdate)
-    const updatedContact = { ...contactToUpdate, ...body }
+    const updatedContact = { ...contactToUpdate, ...body, id: contacts[indexOfContactToUpdate].id }
 
     contacts.splice(indexOfContactToUpdate, 1, updatedContact)
 
