@@ -1,6 +1,7 @@
 const express = require('express')
-const Joi = require('joi')
 const router = express.Router()
+
+const { validateAddContact, validateUpdateContact } = require('../../middlewares/validation')
 
 const {
   listContacts,
@@ -10,92 +11,64 @@ const {
   updateContact,
 } = require('../../model/index')
 
-function validateAddContact(req, res, next) {
-  const schema = Joi.object({
-    name: Joi.string()
-      .min(3)
-      .max(30)
-      .required(),
-    email: Joi.string()
-      .email()
-      .required(),
-    phone: Joi.string()
-      .min(6)
-      .max(15)
-      .required(),
-  })
-
-  const { error } = schema.validate(req.body)
-
-  if (error) {
-    return res.status(400).json({
-      message: `🚫 Missing required ${error.details[0]?.context?.label} field`
-    })
-  }
-
-  next()
-}
-
-function validateUpdateContact(req, res, next) {
-  const schema = Joi.object({
-    name: Joi.string()
-      .min(3)
-      .max(30),
-    email: Joi.string()
-      .email(),
-    phone: Joi.string()
-      .min(6)
-      .max(15),
-  }).or('name', 'email', 'phone')
-
-  const { error } = schema.validate(req.body)
-
-  if (error) return res.status(400).json({ message: '🚫 Missing fields' })
-
-  next()
-}
-
 router.get('/', async (req, res, next) => {
-  const contacts = await listContacts()
+  try {
+    const result = await listContacts()
 
-  if (contacts) return res.json(contacts)
+    if (typeof result === 'string') return res.status(500).json(result)
 
-  next()
+    return res.json(result)
+  } catch (error) {
+    next(error)
+  }
 })
 
 router.get('/:contactId', async (req, res, next) => {
-  const contactId = req.params.contactId
-  const contactById = await getContactById(contactId)
+  try {
+    const result = await getContactById(req.params.contactId)
 
-  if (contactById) return res.json(contactById)
+    if (typeof result === 'string') return res.status(500).json(result)
 
-  next()
+    return res.json(result)
+  } catch (error) {
+    next(error)
+  }
 })
 
 router.post('/', validateAddContact, async (req, res, next) => {
-  const addedContact = await addContact(req.body)
+  try {
+    const result = await addContact(req.body)
 
-  if (addedContact) return res.status(201).json(addedContact)
+    if (typeof result === 'string') return res.status(500).json(result)
 
-  next()
+    return res.status(201).json(result)
+  } catch (error) {
+    next(error)
+  }
 })
 
 router.delete('/:contactId', async (req, res, next) => {
-  const contactId = req.params.contactId
-  const result = await removeContact(contactId)
+  try {
+    const result = await removeContact(req.params.contactId)
 
-  if (result === 'Ok') return res.json({ message: `✅ Contact id: ${contactId} deleted` })
+    if (typeof result === 'string') return res.status(500).json(result)
 
-  next()
+    return res.json({ message: `✅ Contact id: ${req.params.contactId} deleted` })
+  } catch (error) {
+    next(error)
+  }
 })
 
 router.patch('/:contactId', validateUpdateContact, async (req, res, next) => {
-  const contactId = req.params.contactId
-  const updatedContact = await updateContact(contactId, req.body)
+  try {
+    const result = await updateContact(req.params.contactId, req.body)
 
-  if (updatedContact) return res.json(updatedContact)
+    if (typeof result === 'string') return res.status(500).json(result)
 
-  next()
+    return res.json(result)
+  } catch (error) {
+    next(error)
+  }
 })
 
 module.exports = router

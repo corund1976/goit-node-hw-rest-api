@@ -1,8 +1,9 @@
 const fs = require('fs/promises')
+const path = require('path')
 const { nanoid } = require('nanoid')
 // const contacts = require('./contacts.json')
 
-const contactsPath = 'model/contacts.json'
+const contactsPath = path.join(__dirname, './contacts.json')
 
 const listContacts = async () => {
   try {
@@ -14,7 +15,7 @@ const listContacts = async () => {
 
     return contacts
   } catch (err) {
-    console.error(err.message)
+    return err.message
   }
 }
 
@@ -27,7 +28,7 @@ const getContactById = async (contactId) => {
 
     return contactById
   } catch (err) {
-    console.error(err.message)
+    return err.message
   }
 }
 
@@ -47,9 +48,9 @@ const removeContact = async (contactId) => {
 
       console.log('✅ Contact removed & file writed successfully')
     })
-    return 'Ok'
+    return
   } catch (err) {
-    console.error(err.message)
+    return err.message
   }
 }
 
@@ -58,23 +59,21 @@ const addContact = async (body) => {
     const contacts = await listContacts()
     const contactToAdd = {
       id: nanoid(),
-      name: body.name,
-      email: body.email,
-      phone: body.phone
+      ...body
     }
 
     if (!contactToAdd) throw new Error('🚫 Cannot create new contact')
 
-    const newContacts = [...contacts, contactToAdd]
+    contacts.push(contactToAdd)
 
-    await fs.writeFile(contactsPath, JSON.stringify(newContacts), (err) => {
+    await fs.writeFile(contactsPath, JSON.stringify(contacts), (err) => {
       if (err) throw new Error('🚫 Write file failure while Adding contact')
 
       console.log('✅ Contact added & file writed successfully')
     })
     return contactToAdd
   } catch (err) {
-    console.error(err.message)
+    return err.message
   }
 }
 
@@ -97,7 +96,7 @@ const updateContact = async (contactId, body) => {
     })
     return updatedContact
   } catch (err) {
-    console.error(err.message)
+    return err.message
   }
 }
 
