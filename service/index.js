@@ -30,7 +30,7 @@ const updateContact = async (contactId, body) => {
 
 const updateStatusContact = async (contactId, body) => {
   const { favorite } = body
-  return await ContactModel.findByIdAndUpdate(
+  return await Contact.findByIdAndUpdate(
     contactId,
     {
       $set: { favorite },
