@@ -30,7 +30,7 @@ async function validate(schema, obj, next) {
     await schema.validateAsync(obj)
     return next()
   } catch (err) {
-    next({ status: 400, message: err.message.replace(/"/g, "~") })
+    next({ status: 400, message: err.message.replace(/"/g, '~') })
   }
 }
 
@@ -46,17 +46,3 @@ module.exports = {
   validateAddContact,
   validateUpdateContact
 }
-
-// function validateAddContact(req, res, next) {
-//   const validationResult = schemaAddContact.validate(req.body)
-//   if (validationResult.error) return
-//     res.status(400).json({ message: `🚫 Missing required ${error.details[0]?.context?.label} field` })
-//   next()
-// }
-
-// function validateUpdateContact(req, res, next) {
-//   const validationResult = schemaAddContact.validate(req.body)
-//   if (validationResult.error) return
-//     res.status(400).json({ message: '🚫 Missing fields' })
-//   next()
-// }
