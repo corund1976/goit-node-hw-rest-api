@@ -1,4 +1,4 @@
-const mongoose = require('./connection')
+const mongoose = require('../../bin/db')
 
 const Schema = mongoose.Schema
 
@@ -19,6 +19,6 @@ const contactsSchema = new Schema({
   },
 })
 
-const ContactModel = mongoose.model('contact', contactsSchema)
+const Contact = mongoose.model('contact', contactsSchema)
 
-module.exports = ContactModel
+module.exports = Contact

@@ -1,25 +1,25 @@
-const { ContactModel } = require('../db/model')
+const Contact = require('./schemas/contact')
 
 const listContacts = async () => {
-  return await ContactModel.find({})
+  return await Contact.find({})
 }
 
 const getContactById = async (contactId) => {
-  return await ContactModel.findById(contactId)
+  return await Contact.findById(contactId)
 }
 
 const addContact = async (body) => {
-  const newContact = new ContactModel(body)
+  const newContact = new Contact(body)
   await newContact.save()
   return newContact
 }
 
 const removeContact = async (contactId) => {
-  return await ContactModel.findByIdAndDelete(contactId)
+  return await Contact.findByIdAndDelete(contactId)
 }
 
 const updateContact = async (contactId, body) => {
-  return await ContactModel.findByIdAndUpdate(
+  return await Contact.findByIdAndUpdate(
     contactId,
     {
       $set: body,
