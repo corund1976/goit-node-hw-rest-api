@@ -4,7 +4,7 @@ async function listContacts(req, res, next) {
   try {
     const result = await service.listContacts()
 
-    return res.json(result)
+    res.json(result)
   } catch (error) {
     next(error)
   }
@@ -17,7 +17,7 @@ async function getContactById(req, res, next) {
 
     if (!result) throw new Error(`Not Found contact with id ${contactId}`)
 
-    return res.json(result)
+    res.json(result)
   } catch (error) {
     next(error)
   }
@@ -27,7 +27,7 @@ async function addContact(req, res, next) {
   try {
     const result = await service.addContact(req.body)
 
-    return res.status(201).json(result)
+    res.status(201).json(result)
   } catch (error) {
     next(error)
   }
@@ -40,7 +40,7 @@ async function removeContact(req, res, next) {
 
     if (!result) throw new Error(`Not Found contact with id ${contactId}`)
 
-    return res.json({ message: `✅ Contact id: ${contactId} deleted` })
+    res.json({ message: `✅ Contact id: ${contactId} deleted` })
   } catch (error) {
     next(error)
   }
@@ -53,7 +53,7 @@ async function updateContact(req, res, next) {
 
     if (!result) throw new Error(`Not Found contact with id ${contactId}`)
 
-    return res.json(result)
+    res.json(result)
   } catch (error) {
     next(error)
   }
@@ -70,7 +70,7 @@ async function updateStatusContact(req, res, next) {
 
     if (!result) throw new Error(`Not Found contact with id ${contactId}`)
 
-    return res.json(result)
+    res.json(result)
   } catch (error) {
     next(error)
   }
