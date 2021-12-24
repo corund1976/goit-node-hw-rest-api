@@ -10,8 +10,8 @@ const getContactById = async (contactId) => {
 
 const addContact = async (body) => {
   const newContact = new Contact(body)
-  await newContact.save()
-  return newContact
+
+  return await newContact.save()
 }
 
 const removeContact = async (contactId) => {
