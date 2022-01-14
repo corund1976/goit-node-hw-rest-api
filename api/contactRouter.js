@@ -1,25 +1,20 @@
 const router = require('express').Router()
 
-const controller = require('../controller/contactController')
-const { asyncWrapper } = require('../helper/apiHelper')
-const {
-  validatorQueryPagination,
-  validatorObjectId,
-  validatorAddContact,
-  validatorUpdateContact
-} = require('../middleware/validation')
-const authorizator = require('../middleware/authorization')
+const { contactController } = require('../controller')
+const { asyncWrapper } = require('../middleware')
+const { validator } = require('../middleware')
+const { authorizator } = require('../middleware')
 
-router.get('/', authorizator, validatorQueryPagination, asyncWrapper(controller.listContacts))
+router.get('/', authorizator, validator.validatorQueryPagination, asyncWrapper(contactController.listContacts))
 
-router.get('/:contactId', authorizator, validatorObjectId, asyncWrapper(controller.getContactById))
+router.get('/:contactId', authorizator, validator.validatorObjectId, asyncWrapper(contactController.getContactById))
 
-router.post('/', authorizator, validatorAddContact, asyncWrapper(controller.addContact))
+router.post('/', authorizator, validator.validatorAddContact, asyncWrapper(contactController.addContact))
 
-router.delete('/:contactId', authorizator, asyncWrapper(controller.removeContact))
+router.delete('/:contactId', authorizator, asyncWrapper(contactController.removeContact))
 
-router.patch('/:contactId', authorizator, validatorUpdateContact, asyncWrapper(controller.updateContact))
+router.patch('/:contactId', authorizator, validator.validatorUpdateContact, asyncWrapper(contactController.updateContact))
 
-router.patch('/:contactId/favorite', authorizator, validatorUpdateContact, asyncWrapper(controller.updateStatusContact))
+router.patch('/:contactId/favorite', authorizator, validator.validatorUpdateContact, asyncWrapper(contactController.updateStatusContact))
 
 module.exports = router

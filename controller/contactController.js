@@ -1,15 +1,15 @@
-const service = require('../service/contactService')
+const { contactService } = require('../service')
 
 async function listContacts(req, res) {
   const userId = req.user?.id
-  const result = await service.listContacts(userId, req.query)
+  const result = await contactService.listContacts(userId, req.query)
   res.json(result)
 }
 
 async function getContactById(req, res) {
   const { contactId } = req.params
   const userId = req.user?.id
-  const result = await service.getContactById(userId, contactId)
+  const result = await contactService.getContactById(userId, contactId)
 
   if (!result) throw new Error(`Not Found contact with id ${contactId}`)
 
@@ -18,7 +18,7 @@ async function getContactById(req, res) {
 
 async function addContact(req, res) {
   const userId = req.user?.id
-  const result = await service.addContact(userId, req.body)
+  const result = await contactService.addContact(userId, req.body)
 
   res.status(201).json(result)
 }
@@ -26,7 +26,7 @@ async function addContact(req, res) {
 async function removeContact(req, res) {
   const { contactId } = req.params
   const userId = req.user?.id
-  const result = await service.removeContact(userId, contactId)
+  const result = await contactService.removeContact(userId, contactId)
 
   if (!result) throw new Error(`Not Found contact with id ${contactId}`)
 
@@ -36,7 +36,7 @@ async function removeContact(req, res) {
 async function updateContact(req, res) {
   const { contactId } = req.params
   const userId = req.user?.id
-  const result = await service.updateContact(userId, contactId, req.body)
+  const result = await contactService.updateContact(userId, contactId, req.body)
 
   if (!result) throw new Error(`Not Found contact with id ${contactId}`)
 
@@ -50,7 +50,7 @@ async function updateStatusContact(req, res) {
 
   if (!favorite) res.status(400).json({ message: 'Missing field ~favorite~' })
 
-  const result = await service.updateContact(userId, contactId, req.body)
+  const result = await contactService.updateContact(userId, contactId, req.body)
 
   if (!result) throw new Error(`Not Found contact with id ${contactId}`)
 

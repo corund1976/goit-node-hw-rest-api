@@ -37,7 +37,18 @@ const schemaUser = Joi.object({
     .required(),
   password: Joi.string()
     .required(),
+  subscription: ['starter', 'pro', 'business']
 })
+
+const schemaUpdateUser = Joi.object({
+  username: Joi.string()
+    .min(3)
+    .max(30),
+  email: Joi.string()
+    .email(),
+  password: Joi.string(),
+  subscription: ['starter', 'pro', 'business']
+}).or('username', 'email', 'password', 'subscription')
 
 const schemaQueryPagination = Joi.object({
   sortBy: Joi.string().valid('name', 'subscription', 'id', 'phone').optional(),
@@ -69,8 +80,12 @@ async function validatorUser(req, res, next) {
   return await validate(schemaUser, req.body, next)
 }
 
+async function validatorUpdateUser(req, res, next) {
+  return await validate(schemaUpdateUser, req.body, next)
+}
+
 async function validatorQueryPagination(req, res, next) {
-  return await validate(schemaQueryPagination, req.body, next)
+  return await validate(schemaQueryPagination, req.query, next)
 }
 
 async function validatorObjectId(req, res, next) {
@@ -84,6 +99,7 @@ module.exports = {
   validatorAddContact,
   validatorUpdateContact,
   validatorUser,
+  validatorUpdateUser,
   validatorQueryPagination,
   validatorObjectId
 }

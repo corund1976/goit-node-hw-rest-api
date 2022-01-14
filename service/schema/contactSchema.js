@@ -1,6 +1,7 @@
+const mongoosePaginate = require('mongoose-paginate-v2')
+
 const mongoose = require('../dbConnection')
 const { Schema, model, SchemaTypes } = mongoose
-const mongoosePaginate = require('mongoose-paginate-v2')
 
 const contactSchema = new Schema({
   name: {

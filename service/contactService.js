@@ -1,4 +1,4 @@
-const Contact = require('./schemas/contactSchema')
+const { Contact } = require('./schema')
 
 const listContacts = async (userId, query) => {
   const {
@@ -10,7 +10,7 @@ const listContacts = async (userId, query) => {
     optionsSearch.favorite = favorite
   }
 
-  const result = await Contact.paginate(optionsSearch,
+  return await Contact.paginate(optionsSearch,
     {
       limit,
       offset,
@@ -23,8 +23,8 @@ const listContacts = async (userId, query) => {
         path: 'owner',
         select: 'name email gender -_id'
       }
-    })
-  return result
+    }
+  )
 }
 
 const getContactById = async (userId, contactId) => {

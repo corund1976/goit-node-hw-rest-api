@@ -3,10 +3,9 @@ const logger = require('morgan')
 const cors = require('cors')
 const rateLimit = require('express-rate-limit')
 
-const userRouter = require('./api/userRouter')
-const contactRouter = require('./api/contactRouter')
+const { userRouter, contactRouter } = require('./api')
 
-const { errorHandler } = require('./helper/apiHelper')
+const { errorHandler } = require('./middleware')
 
 const app = express()
 

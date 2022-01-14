@@ -1,13 +1,14 @@
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
-const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY
 
-const service = require('../service/userService')
+const { userService } = require('../service')
 const HttpCode = require('../helper/httpCode')
+
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY
 
 async function signup(req, res, next) {
   const { email } = req.body
-  const user = await service.findByEmail(email)
+  const user = await userService.findByEmail(email)
   if (user) {
     return res.status(HttpCode.CONFLICT).json({
       status: 'Conflict',
@@ -16,7 +17,7 @@ async function signup(req, res, next) {
     })
   }
   try {
-    const newUser = await service.createUser(req.body)
+    const newUser = await userService.createUser(req.body)
 
     return res.status(HttpCode.CREATED).json({
       status: 'Created',
@@ -37,7 +38,7 @@ async function signup(req, res, next) {
 
 async function login(req, res, next) {
   const { email, password } = req.body
-  const user = await service.findByEmail(email)
+  const user = await userService.findByEmail(email)
   const isValidPassword = await user?.validPassword(password)
 
   if (!user || !isValidPassword) {
@@ -54,7 +55,7 @@ async function login(req, res, next) {
   }
   const token = jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: '1h' })
 
-  await service.updateToken(user.id, token)
+  await userService.updateToken(user.id, token)
 
   return res.status(HttpCode.OK).json({
     status: 'Ok',
@@ -86,13 +87,27 @@ async function current(req, res, next) {
 }
 
 async function logout(req, res, next) {
-  const id = req.user.id
-
-  await service.updateToken(id, null)
-
+  const userId = req.user.id
+  await userService.updateToken(userId, null)
   return res.status(HttpCode.NO_CONTENT).json({
     status: 'No Content',
     code: HttpCode.NO_CONTENT
+  })
+}
+
+async function updateSubscriptionUser(req, res, next) {
+  const { userId } = req.params
+  const { subscription } = req.body
+
+  if (!subscription) res.status(400).json({ message: 'Missing field ~subscription~' })
+
+  await userService.updateSubscriptionUser(userId, subscription)
+  return await res.status(HttpCode.OK).json({
+    status: 'Ok',
+    code: HttpCode.OK,
+    data: {
+      user: { userId, subscription }
+    }
   })
 }
 
@@ -101,4 +116,5 @@ module.exports = {
   login,
   current,
   logout,
+  updateSubscriptionUser
 }
