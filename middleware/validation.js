@@ -1,4 +1,5 @@
 const Joi = require('joi')
+const mongoose = require('mongoose')
 
 const schemaAddContact = Joi.object({
   name: Joi.string()
@@ -12,6 +13,7 @@ const schemaAddContact = Joi.object({
     .min(6)
     .max(15)
     .required(),
+  favorite: Joi.bool()
 })
 
 const schemaUpdateContact = Joi.object({
@@ -23,7 +25,28 @@ const schemaUpdateContact = Joi.object({
   phone: Joi.string()
     .min(6)
     .max(15),
-}).or('name', 'email', 'phone')
+  favorite: Joi.bool()
+}).or('name', 'email', 'phone', 'favorite')
+
+const schemaUser = Joi.object({
+  username: Joi.string()
+    .min(3)
+    .max(30),
+  email: Joi.string()
+    .email()
+    .required(),
+  password: Joi.string()
+    .required(),
+})
+
+const schemaQueryPagination = Joi.object({
+  sortBy: Joi.string().valid('name', 'subscription', 'id', 'phone').optional(),
+  sortByDesc: Joi.string().valid('name', 'subscription', 'id', 'phone').optional(),
+  filter: Joi.string().optional(),
+  limit: Joi.number().integer().min(1).max(50).optional(),
+  offset: Joi.number().integer().min(1).optional(),
+  favorite: Joi.boolean().optional(),
+}).without('sortBy', 'sortByDesc')
 
 async function validate(schema, obj, next) {
   try {
@@ -34,15 +57,33 @@ async function validate(schema, obj, next) {
   }
 }
 
-async function validateAddContact(req, res, next) {
+async function validatorAddContact(req, res, next) {
   return await validate(schemaAddContact, req.body, next)
 }
 
-async function validateUpdateContact(req, res, next) {
+async function validatorUpdateContact(req, res, next) {
   return await validate(schemaUpdateContact, req.body, next)
 }
 
+async function validatorUser(req, res, next) {
+  return await validate(schemaUser, req.body, next)
+}
+
+async function validatorQueryPagination(req, res, next) {
+  return await validate(schemaQueryPagination, req.body, next)
+}
+
+async function validatorObjectId(req, res, next) {
+  if (!mongoose.Types.ObjectId.isValid(req.params.contactId)) {
+    return next({ status: 400, message: 'Inavalid Object Id' })
+  }
+  next()
+}
+
 module.exports = {
-  validateAddContact,
-  validateUpdateContact
+  validatorAddContact,
+  validatorUpdateContact,
+  validatorUser,
+  validatorQueryPagination,
+  validatorObjectId
 }
