@@ -118,7 +118,7 @@ async function updateSubscriptionUser(req, res, next) {
   if (!('subscription' in req.body)) res.status(400).json({ message: 'Missing field ~subscription~' })
 
   try {
-    await userService.updateSubscriptionUser(userId, req.body)
+    await userService.updateSubscriptionUser(userId, subscription)
 
     return await res.status(HttpCode.OK).json({
       status: 'Ok',
