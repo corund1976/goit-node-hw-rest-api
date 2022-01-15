@@ -46,6 +46,7 @@ async function updateContact(req, res) {
 async function updateStatusContact(req, res) {
   const { contactId } = req.params
   const userId = req.user?.id
+
   if (!('favorite' in req.body)) {
     return res.status(400).json({ message: 'Missing field ~favorite~' })
   }
