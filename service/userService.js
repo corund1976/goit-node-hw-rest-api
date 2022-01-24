@@ -4,8 +4,8 @@ const findByEmail = async (email) => {
   return await User.findOne({ email })
 }
 
-const createUser = async ({ username, email, password }) => {
-  const newUser = new User({ username, email })
+const createUser = async ({ username, email, password }, avatarURL) => {
+  const newUser = new User({ username, email, avatarURL })
   newUser.setPassword(password)
   return await newUser.save()
 }
@@ -22,10 +22,18 @@ const updateToken = async (id, token) => {
   )
 }
 
-const updateSubscriptionUser = async (id, subscription) => {
+const updateSubscription = async (id, subscription) => {
   return await User.findByIdAndUpdate(
     id,
     { $set: { subscription } },
+    { new: true }
+  )
+}
+
+const updateAvatar = async (id, newAvatarURL) => {
+  return await User.findByIdAndUpdate(
+    id,
+    { $set: { avatarURL: newAvatarURL } },
     { new: true }
   )
 }
@@ -35,5 +43,6 @@ module.exports = {
   findById,
   createUser,
   updateToken,
-  updateSubscriptionUser
+  updateSubscription,
+  updateAvatar,
 }

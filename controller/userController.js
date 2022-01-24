@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const gravatar = require('gravatar')
 require('dotenv').config()
 
 const { userService } = require('../service')
@@ -19,7 +20,8 @@ async function signup(req, res, next) {
   }
 
   try {
-    const newUser = await userService.createUser(req.body)
+    const avatarURL = gravatar.url(email, { s: 400 }, true)
+    const newUser = await userService.createUser(req.body, avatarURL)
 
     return res.status(HttpCode.CREATED).json({
       status: 'Created',
@@ -29,7 +31,8 @@ async function signup(req, res, next) {
           id: newUser.id,
           username: newUser.username,
           email: newUser.email,
-          subscription: newUser.subscription
+          subscription: newUser.subscription,
+          avatarURL: newUser.avatarURL
         }
       }
     })
@@ -66,8 +69,11 @@ async function login(req, res, next) {
       data: {
         token: token,
         user: {
+          id: user.id,
+          username: user.username,
           email: user.email,
-          subscription: user.subscription
+          subscription: user.subscription,
+          avatarURL: user.avatarURL
         }
       }
     })
@@ -111,14 +117,14 @@ async function logout(req, res, next) {
   }
 }
 
-async function updateSubscriptionUser(req, res, next) {
+async function updateSubscription(req, res, next) {
   const { userId } = req.params
   const { subscription } = req.body
 
   if (!('subscription' in req.body)) res.status(400).json({ message: 'Missing field ~subscription~' })
 
   try {
-    await userService.updateSubscriptionUser(userId, subscription)
+    await userService.updateSubscription(userId, subscription)
 
     return await res.status(HttpCode.OK).json({
       status: 'Ok',
@@ -135,10 +141,32 @@ async function updateSubscriptionUser(req, res, next) {
   }
 }
 
+async function updateAvatar(req, res, next) {
+  const userId = req.user.id
+  const newAvatarURL = `/avatars/${req.file.filename}`
+
+  try {
+    await userService.updateAvatar(userId, newAvatarURL)
+
+    return await res.status(HttpCode.OK).json({
+      status: 'Ok',
+      code: HttpCode.OK,
+      data: {
+        user: {
+          newAvatarURL,
+        }
+      }
+    })
+  } catch (e) {
+    next(e)
+  }
+}
+
 module.exports = {
   signup,
   login,
   current,
   logout,
-  updateSubscriptionUser
+  updateSubscription,
+  updateAvatar,
 }

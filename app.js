@@ -4,7 +4,6 @@ const cors = require('cors')
 const rateLimit = require('express-rate-limit')
 
 const { userRouter, contactRouter } = require('./api')
-
 const { errorHandler } = require('./middleware')
 
 const app = express()
@@ -34,8 +33,10 @@ app.use(cors({
 
 app.use(express.json())
 
-app.use('/api/users', userRouter)
+app.use(express.static('public'))
+
 app.use('/api/contacts', contactRouter)
+app.use('/api/users', userRouter)
 
 app.use((req, res) => {
   res.status(404).json({ message: '🚫 Not found' })
