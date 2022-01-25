@@ -1,9 +1,11 @@
 const jwt = require('jsonwebtoken')
 const gravatar = require('gravatar')
+const { nanoid } = require('nanoid')
 require('dotenv').config()
 
 const { userService } = require('../service')
 const HttpCode = require('../helper/httpCode')
+const sendVerifyEmail = require('../helper/sendVerifyEmail')
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY
 
@@ -20,8 +22,11 @@ async function signup(req, res, next) {
   }
 
   try {
-    const avatarURL = gravatar.url(email, { s: 400 }, true)
-    const newUser = await userService.createUser(req.body, avatarURL)
+    const avatarURL = gravatar.url(email, { s: 250 }, true)
+    const verificationToken = nanoid()
+    const newUser = await userService.createUser(req.body, avatarURL, verificationToken)
+
+    await sendVerifyEmail(email, verificationToken, next)
 
     return res.status(HttpCode.CREATED).json({
       status: 'Created',
@@ -32,12 +37,11 @@ async function signup(req, res, next) {
           username: newUser.username,
           email: newUser.email,
           subscription: newUser.subscription,
-          avatarURL: newUser.avatarURL
         }
       }
     })
-  } catch (e) {
-    next(e)
+  } catch (error) {
+    next(error)
   }
 }
 
@@ -51,6 +55,14 @@ async function login(req, res, next) {
       status: 'Unauthorized',
       code: HttpCode.UNAUTHORIZED,
       message: 'Email or password is wrong'
+    })
+  }
+
+  if (!user.verify) {
+    return await res.status(HttpCode.UNAUTHORIZED).json({
+      status: 'Unauthorized',
+      code: HttpCode.UNAUTHORIZED,
+      message: 'Email not verified'
     })
   }
 
@@ -77,8 +89,8 @@ async function login(req, res, next) {
         }
       }
     })
-  } catch (e) {
-    next(e)
+  } catch (error) {
+    next(error)
   }
 }
 
@@ -97,8 +109,8 @@ async function current(req, res, next) {
         }
       }
     })
-  } catch (e) {
-    next(e)
+  } catch (error) {
+    next(error)
   }
 }
 
@@ -112,8 +124,8 @@ async function logout(req, res, next) {
       status: 'No Content',
       code: HttpCode.NO_CONTENT
     })
-  } catch (e) {
-    next(e)
+  } catch (error) {
+    next(error)
   }
 }
 
@@ -136,8 +148,8 @@ async function updateSubscription(req, res, next) {
         }
       }
     })
-  } catch (e) {
-    next(e)
+  } catch (error) {
+    next(error)
   }
 }
 
@@ -157,8 +169,71 @@ async function updateAvatar(req, res, next) {
         }
       }
     })
-  } catch (e) {
-    next(e)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const verify = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params
+
+    const user = await userService.findByVerifyToken(verificationToken)
+
+    if (user) {
+      await userService.updateVerify(verificationToken)
+
+      return res.status(HttpCode.OK).json({
+        status: 'success',
+        code: HttpCode.OK,
+        message: 'Verification successful'
+      })
+    }
+
+    return res.status(HttpCode.NOT_FOUND).json({
+      status: 'error',
+      code: HttpCode.NOT_FOUND,
+      message: 'Not found'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const repeatVerify = async (req, res, next) => {
+  try {
+    const { email } = req.body
+    const user = await userService.findByEmail(email)
+
+    if (user.verify) {
+      return res.status(HttpCode.BAD_REQUEST).json({
+        status: 'error',
+        code: HttpCode.BAD_REQUEST,
+        message: 'Verification has already been passed'
+      })
+    }
+
+    if (user) {
+      const { verificationToken } = user
+
+      await sendVerifyEmail(email, verificationToken, next)
+
+      return res.status(HttpCode.OK).json({
+        status: 'success',
+        code: HttpCode.OK,
+        data: {
+          message: 'Verification email resubmitted'
+        }
+      })
+    }
+
+    return res.status(HttpCode.NOT_FOUND).json({
+      status: 'error',
+      code: HttpCode.NOT_FOUND,
+      message: 'User not found'
+    })
+  } catch (error) {
+    next(error)
   }
 }
 
@@ -169,4 +244,6 @@ module.exports = {
   logout,
   updateSubscription,
   updateAvatar,
+  verify,
+  repeatVerify,
 }
