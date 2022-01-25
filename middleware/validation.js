@@ -51,13 +51,32 @@ const schemaUpdateUser = Joi.object({
 }).or('username', 'email', 'password', 'subscription')
 
 const schemaQueryPagination = Joi.object({
-  sortBy: Joi.string().valid('name', 'subscription', 'id', 'phone').optional(),
-  sortByDesc: Joi.string().valid('name', 'subscription', 'id', 'phone').optional(),
-  filter: Joi.string().optional(),
-  limit: Joi.number().integer().min(1).max(50).optional(),
-  offset: Joi.number().integer().min(1).optional(),
-  favorite: Joi.boolean().optional(),
+  sortBy: Joi.string()
+    .valid('name', 'subscription', 'id', 'phone')
+    .optional(),
+  sortByDesc: Joi.string()
+    .valid('name', 'subscription', 'id', 'phone')
+    .optional(),
+  filter: Joi.string()
+    .optional(),
+  limit: Joi.number()
+    .integer()
+    .min(1)
+    .max(50)
+    .optional(),
+  offset: Joi.number()
+    .integer()
+    .min(1)
+    .optional(),
+  favorite: Joi.boolean()
+    .optional(),
 }).without('sortBy', 'sortByDesc')
+
+const schemaPostVerify = Joi.object({
+  email: Joi.string()
+    .email()
+    .required(),
+})
 
 async function validate(schema, obj, next) {
   try {
@@ -68,38 +87,43 @@ async function validate(schema, obj, next) {
   }
 }
 
-async function validatorAddContact(req, res, next) {
+async function addContact(req, res, next) {
   return await validate(schemaAddContact, req.body, next)
 }
 
-async function validatorUpdateContact(req, res, next) {
+async function updateContact(req, res, next) {
   return await validate(schemaUpdateContact, req.body, next)
 }
 
-async function validatorUser(req, res, next) {
+async function user(req, res, next) {
   return await validate(schemaUser, req.body, next)
 }
 
-async function validatorUpdateUser(req, res, next) {
+async function updateUser(req, res, next) {
   return await validate(schemaUpdateUser, req.body, next)
 }
 
-async function validatorQueryPagination(req, res, next) {
+async function queryPagination(req, res, next) {
   return await validate(schemaQueryPagination, req.query, next)
 }
 
-async function validatorObjectId(req, res, next) {
+async function objectId(req, res, next) {
   if (!mongoose.Types.ObjectId.isValid(req.params.contactId)) {
     return next({ status: 400, message: 'Inavalid Object Id' })
   }
   next()
 }
 
+async function postVerify(req, res, next) {
+  return await validate(schemaPostVerify, req.body, next)
+}
+
 module.exports = {
-  validatorAddContact,
-  validatorUpdateContact,
-  validatorUser,
-  validatorUpdateUser,
-  validatorQueryPagination,
-  validatorObjectId
+  addContact,
+  updateContact,
+  user,
+  updateUser,
+  queryPagination,
+  objectId,
+  postVerify,
 }

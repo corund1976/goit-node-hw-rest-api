@@ -4,11 +4,11 @@ const { userController } = require('../controller')
 const { authorizator, validator, asyncWrapper, upload, imageCompressor } = require('../middleware')
 
 router.post('/signup',
-  validator.validatorUser,
+  validator.user,
   asyncWrapper(userController.signup))
 
 router.post('/login',
-  validator.validatorUser,
+  validator.user,
   asyncWrapper(userController.login))
 
 router.get('/current',
@@ -21,7 +21,7 @@ router.post('/logout',
 
 router.patch('/:userId/subscription',
   authorizator,
-  validator.validatorUpdateUser,
+  validator.updateUser,
   asyncWrapper(userController.updateSubscription))
 
 router.patch('/avatars',
@@ -29,5 +29,12 @@ router.patch('/avatars',
   upload.single('avatar'),
   imageCompressor,
   asyncWrapper(userController.updateAvatar))
+
+router.get('/verify/:verificationToken',
+  asyncWrapper(userController.verify))
+
+router.post('/verify',
+  validator.postVerify,
+  asyncWrapper(userController.repeatVerify))
 
 module.exports = router
